@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.demo.dao.UserExamDAO">
+    <resultMap id="userExamResult" type="com.example.demo.UserExam">
+		<result property="id" column="id" jdbcType="VARCHAR"/>
+		<result property="merchantId" column="merchant_id" jdbcType="VARCHAR"/>
+		<result property="userId" column="user_id" jdbcType="VARCHAR"/>
+		<result property="shopId" column="shop_id" jdbcType="VARCHAR"/>
+		<result property="courseCode" column="course_code" jdbcType="VARCHAR"/>
+		<result property="answers" column="answers" jdbcType="LONGVARCHAR"/>
+		<result property="score" column="score" jdbcType="INTEGER"/>
+		<result property="pass" column="pass" jdbcType="INTEGER"/>
+		<result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+	</resultMap>
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="commonColumns">
+	    <![CDATA[
+
+                    user_exam.id ,
+                    user_exam.merchant_id ,
+                    user_exam.user_id ,
+                    user_exam.shop_id ,
+                    user_exam.course_code ,
+                    user_exam.answers ,
+                    user_exam.score ,
+                    user_exam.pass ,
+                    user_exam.created_at
+]]>
+	</sql>
+	
+    <insert id="insert" parameterType="com.example.demo.UserExam">
+    <![CDATA[
+
+                INSERT INTO
+                user_exam (
+                    id ,
+                    merchant_id ,
+                    user_id ,
+                    shop_id ,
+                    course_code ,
+                    answers ,
+                    score ,
+                    pass ,
+                    created_at
+                ) VALUES (
+                    #{id, jdbcType=VARCHAR} ,
+                    #{merchantId, jdbcType=VARCHAR} ,
+                    #{userId, jdbcType=VARCHAR} ,
+                    #{shopId, jdbcType=VARCHAR} ,
+                    #{courseCode, jdbcType=VARCHAR} ,
+                    #{answers, jdbcType=LONGVARCHAR} ,
+                    #{score, jdbcType=INTEGER} ,
+                    #{pass, jdbcType=INTEGER} ,
+                    #{createdAt, jdbcType=TIMESTAMP}
+                )
+]]>
+    </insert>
+
+	<insert id="insertByBatch" parameterType="list">
+	<![CDATA[
+		INSERT INTO
+		user_exam (
+			id ,
+			merchant_id ,
+			user_id ,
+			shop_id ,
+			course_code ,
+			answers ,
+			score ,
+			pass ,
+			created_at 
+		) VALUES ]]>
+		<foreach collection="list" item="item" separator=",">
+		<![CDATA[ (
+				#{item.id, jdbcType=VARCHAR} ,
+				#{item.merchantId, jdbcType=VARCHAR} ,
+				#{item.userId, jdbcType=VARCHAR} ,
+				#{item.shopId, jdbcType=VARCHAR} ,
+				#{item.courseCode, jdbcType=VARCHAR} ,
+				#{item.answers, jdbcType=LONGVARCHAR} ,
+				#{item.score, jdbcType=INTEGER} ,
+				#{item.pass, jdbcType=INTEGER} ,
+				#{item.createdAt, jdbcType=TIMESTAMP} 
+			)
+		]]>
+		</foreach>
+	</insert>
+
+    <update id="update" parameterType="com.example.demo.UserExam">
+    <![CDATA[
+
+                UPDATE user_exam SET
+                    merchant_id = #{merchantId, jdbcType=VARCHAR} ,
+                    user_id = #{userId, jdbcType=VARCHAR} ,
+                    shop_id = #{shopId, jdbcType=VARCHAR} ,
+                    course_code = #{courseCode, jdbcType=VARCHAR} ,
+                    answers = #{answers, jdbcType=LONGVARCHAR} ,
+                    score = #{score, jdbcType=INTEGER} ,
+                    pass = #{pass, jdbcType=INTEGER} ,
+                    created_at = #{createdAt, jdbcType=TIMESTAMP}
+                WHERE
+                    id = #{id, jdbcType=VARCHAR}
+]]>
+    </update>
+
+	<update id="updateSelective" parameterType="com.example.demo.UserExam">
+		UPDATE user_exam
+		<set>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(merchantId)">
+				merchant_id = #{merchantId, jdbcType=VARCHAR} ,
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(userId)">
+				user_id = #{userId, jdbcType=VARCHAR} ,
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(shopId)">
+				shop_id = #{shopId, jdbcType=VARCHAR} ,
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(courseCode)">
+				course_code = #{courseCode, jdbcType=VARCHAR} ,
+			</if>
+			<if test="answers != null">
+				answers = #{answers, jdbcType=LONGVARCHAR} ,
+			</if>
+			<if test="score != null">
+				score = #{score, jdbcType=INTEGER} ,
+			</if>
+			<if test="pass != null">
+				pass = #{pass, jdbcType=INTEGER} ,
+			</if>
+			<if test="createdAt != null">
+				created_at = #{createdAt, jdbcType=TIMESTAMP} 
+			</if>
+		</set>
+		WHERE
+			id = #{id, jdbcType=VARCHAR} 
+	</update>
+
+	<sql id="dynamicWhere">
+		<where>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(id)">
+				AND user_exam.id = #{id}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(merchantId)">
+				AND user_exam.merchant_id = #{merchantId}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(userId)">
+				AND user_exam.user_id = #{userId}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(shopId)">
+				AND user_exam.shop_id = #{shopId}
+			</if>
+			<if test="shopIds != null">
+				AND user_exam.shop_id in
+				<foreach collection="shopIds" index="index" item="shopId" open="(" separator="," close=")">
+					#{shopId}
+				</foreach>
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(courseCode)">
+				AND user_exam.course_code = #{courseCode}
+			</if>
+			<if test="createEndAt != null">
+				<![CDATA[
+				AND user_exam.created_at <= #{createEndAt}
+				]]>
+			</if>
+			<if test="createStartAt != null">
+				<![CDATA[
+				AND user_exam.created_at >= #{createStartAt}
+					]]>
+			</if>
+			<if test="answers != null">
+				AND user_exam.answers = #{answers}
+			</if>
+			<if test="score != null">
+				AND user_exam.score = #{score}
+			</if>
+			<if test="pass != null">
+				AND user_exam.pass = #{pass}
+			</if>
+			<if test="createdAt != null">
+		 		AND user_exam.created_at = #{createdAt}
+			</if>
+	    </where>	
+	</sql>
+	
+	<delete id="delete" parameterType="map">
+        DELETE FROM user_exam
+		<include refid="dynamicWhere"/>
+    </delete>
+	 
+    <select id="count" resultType="java.lang.Integer" parameterType="map">
+		SELECT COUNT(1)
+		FROM user_exam
+		<include refid="dynamicWhere"/>
+	</select>
+
+	<select id="query" parameterType="map" resultType="com.example.demo.UserExam">
+		SELECT <include refid="commonColumns"/>
+		FROM user_exam
+		<include refid="dynamicWhere"/>
+	</select>
+
+
+</mapper>

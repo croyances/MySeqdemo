@@ -1,0 +1,23 @@
+server:
+  port: 8090
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://10.100.10.13:3306/ty-app-learning?autoReconnect=true&allowMultiQueries=true
+    password: test
+    username: test
+
+
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+
+mybatis:
+  mapper-locations: classpath*:com/example/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
